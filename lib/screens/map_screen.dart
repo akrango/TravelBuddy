@@ -40,11 +40,10 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       myCurrentLocation = LatLng(position.latitude, position.longitude);
     });
-
     googleMapController.animateCamera(
       CameraUpdate.newLatLng(myCurrentLocation),
     );
-  }
+    }
 
   Future<void> _loadMarkers(BuildContext context) async {
     final placeProvider = Provider.of<PlaceProvider>(context, listen: false);

@@ -3,6 +3,7 @@ import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
   final Place place;
@@ -14,6 +15,20 @@ class PlaceDetailScreen extends StatefulWidget {
 
 class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   int currentIndex = 0;
+  GoogleMapController? _mapController;
+  late LatLng _location;
+
+  @override
+  void initState() {
+    super.initState();
+    _location = LatLng(widget.place.latitude, widget.place.longitude);
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -103,6 +118,26 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     widget.place.address,
                     style: const TextStyle(
                       fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 300,
+                    child: GoogleMap(
+                      onMapCreated: _onMapCreated,
+                      initialCameraPosition: CameraPosition(
+                        target: _location,
+                        zoom: 14.0,
+                      ),
+                      markers: {
+                        Marker(
+                          markerId: MarkerId("placeMarker"),
+                          position: _location,
+                          infoWindow: InfoWindow(
+                            title: widget.place.title,
+                            snippet: "Rating: ${widget.place.rating.toString()}",
+                          ),
+                        ),
+                      },
                     ),
                   ),
                   const SizedBox(height: 100),
