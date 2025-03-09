@@ -224,7 +224,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => ReservationScreen(
-          placeId: place.id,
+          place: place,
         ),
       ),
     );

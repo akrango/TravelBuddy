@@ -1,3 +1,4 @@
+import 'package:airbnb_app/models/place.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,18 +6,20 @@ import 'package:table_calendar/table_calendar.dart';
 import '../models/reservation.dart';
 
 class ReservationScreen extends StatefulWidget {
-  final String placeId;
+  final Place place;
 
-  const ReservationScreen({Key? key, required this.placeId}) : super(key: key);
+  const ReservationScreen({Key? key, required this.place}) : super(key: key);
 
   @override
   State<ReservationScreen> createState() => _ReservationScreenState();
 }
 
 class _ReservationScreenState extends State<ReservationScreen> {
+  CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime? _startDate;
   DateTime? _endDate;
   List<DateTime> _unavailableDates = [];
+  int _numberOfPeople = 1;
 
   @override
   void initState() {
@@ -24,10 +27,16 @@ class _ReservationScreenState extends State<ReservationScreen> {
     _fetchUnavailableDates();
   }
 
+  void _onFormatChanged(CalendarFormat format) {
+    setState(() {
+      _calendarFormat = format;
+    });
+  }
+
   Future<void> _fetchUnavailableDates() async {
     final reservations = await FirebaseFirestore.instance
         .collection('reservations')
-        .where('placeId', isEqualTo: widget.placeId)
+        .where('placeId', isEqualTo: widget.place.id)
         .get();
 
     setState(() {
@@ -53,11 +62,11 @@ class _ReservationScreenState extends State<ReservationScreen> {
 
     final reservation = Reservation(
       id: FirebaseFirestore.instance.collection('reservations').doc().id,
-      placeId: widget.placeId,
+      placeId: widget.place.id,
       userId: uid,
       startDate: _startDate!,
       endDate: _endDate!,
-      numberOfPeople: 2,
+      numberOfPeople: _numberOfPeople,
     );
 
     await FirebaseFirestore.instance
@@ -97,7 +106,36 @@ class _ReservationScreenState extends State<ReservationScreen> {
               disabledDecoration: const BoxDecoration(color: Colors.grey),
               outsideTextStyle: const TextStyle(color: Colors.white),
             ),
+            calendarFormat: _calendarFormat,
+            onFormatChanged: _onFormatChanged,
             enabledDayPredicate: (day) => !_isDateUnavailable(day),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: Row(
+              children: [
+                const Text(
+                  'Number of People: ',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(width: 10),
+                DropdownButton<int>(
+                  value: _numberOfPeople,
+                  onChanged: (int? newValue) {
+                    setState(() {
+                      _numberOfPeople = newValue!;
+                    });
+                  },
+                  items: List.generate(
+                    widget.place.maxPeople,
+                    (index) => DropdownMenuItem<int>(
+                      value: index + 1,
+                      child: Text((index + 1).toString()),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           ElevatedButton(
             onPressed: (_startDate != null && _endDate != null)
