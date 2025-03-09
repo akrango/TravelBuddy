@@ -14,7 +14,7 @@ class SearchBarAndFilter extends StatefulWidget {
 class _SearchBarAndFilterState extends State<SearchBarAndFilter> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  bool _isFocused = false; // Track focus state
+  bool _isFocused = false;
 
   final FocusNode _searchFocusNode = FocusNode();
 

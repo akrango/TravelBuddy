@@ -12,65 +12,85 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
-  int selectedIndex = 0;
+  ValueNotifier<int> selectedIndexNotifier = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    selectedIndexNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            const SearchBarAndFilter(),
-            listOfCategoryItems(size),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    DisplayPlace(selectedCategoryIndex: selectedIndex),
-                  ],
+    return Consumer<CategoryProvider>(
+      builder: (context, categoryProvider, child) {
+        if (categoryProvider.categories.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                const SearchBarAndFilter(),
+                listOfCategoryItems(size, categoryProvider),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        ValueListenableBuilder<int>(
+                          valueListenable: selectedIndexNotifier,
+                           builder: (context, selectedIndex, child) {
+                            String selectedCategoryId = categoryProvider.categories[selectedIndex].id;
+                            return DisplayPlace(selectedCategoryId: selectedCategoryId);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+        );
+      },
     );
   }
 
-  Widget listOfCategoryItems(Size size) {
-    return Consumer<CategoryProvider>(
-      builder: (context, categoryProvider, child) {
-        final categories = categoryProvider.categories;
+  Widget listOfCategoryItems(Size size, CategoryProvider categoryProvider) {
+    final categories = categoryProvider.categories;
 
-        return Stack(
-          children: [
-            const Positioned(
-              left: 0,
-              right: 0,
-              top: 80,
-              child: Divider(
-                color: Colors.black12,
-              ),
-            ),
-            SizedBox(
-              height: size.height * 0.14,
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                scrollDirection: Axis.horizontal,
-                itemCount: categories.length,
-                physics: const BouncingScrollPhysics(),
-                itemBuilder: (context, index) {
+    return Stack(
+      children: [
+        const Positioned(
+          left: 0,
+          right: 0,
+          top: 80,
+          child: Divider(
+            color: Colors.black12,
+          ),
+        ),
+        SizedBox(
+          height: size.height * 0.14,
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            scrollDirection: Axis.horizontal,
+            itemCount: categories.length,
+            physics: const BouncingScrollPhysics(),
+            itemBuilder: (context, index) {
+              return ValueListenableBuilder<int>(
+                valueListenable: selectedIndexNotifier,
+                builder: (context, selectedIndex, child) {
                   return GestureDetector(
                     onTap: () {
-                      setState(() {
-                        selectedIndex = index;
-                      });
+                      selectedIndexNotifier.value = index;
                     },
                     child: Container(
                       padding: const EdgeInsets.only(
@@ -129,11 +149,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     ),
                   );
                 },
-              ),
-            ),
-          ],
-        );
-      },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

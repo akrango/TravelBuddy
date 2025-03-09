@@ -1,5 +1,7 @@
+import 'package:airbnb_app/models/user.dart';
 import 'package:airbnb_app/screens/login.dart';
 import 'package:airbnb_app/screens/main_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,6 +17,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -22,6 +25,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
       TextEditingController();
 
   bool _isLoading = false;
+  String _selectedRole = 'guest';
+
+  Future<void> _addUserToFirestore(User user) async {
+    final userDoc = _firestore.collection('users').doc(user.uid);
+    final userExists = await userDoc.get();
+
+    if (!userExists.exists) {
+      final newUser = UserModel(
+          uid: user.uid,
+          email: user.email ?? '',
+          role: _selectedRole,
+          displayName: user.displayName ?? '',
+          photoURL: user.photoURL ?? '');
+      await userDoc.set(newUser.toMap());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +174,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ),
                                 ),
                         ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          "Sign up as",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        DropdownButtonFormField<String>(
+                          value: _selectedRole,
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'guest',
+                              child: Text('Guest'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'host',
+                              child: Text('Host'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedRole = value!;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -186,12 +238,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   _buildCard(
                     child: Column(
                       children: [
-                        socialIcons(
-                          Icons.facebook,
-                          "Continue with Facebook",
-                          Colors.blue,
-                        ),
-                        const Divider(),
                         InkWell(
                           onTap: _signUpWithGoogle,
                           child: socialIcons(
@@ -199,12 +245,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             "Continue with Google",
                             Colors.red,
                           ),
-                        ),
-                        const Divider(),
-                        socialIcons(
-                          Icons.apple,
-                          "Continue with Apple",
-                          Colors.black,
                         ),
                       ],
                     ),
@@ -271,10 +311,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
+
+      await _addUserToFirestore(userCredential.user!);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
@@ -303,7 +347,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
-        await FirebaseAuth.instance.signInWithCredential(credential);
+        UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
+
+        await _addUserToFirestore(userCredential.user!);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainScreen()),

@@ -1,6 +1,5 @@
 import 'package:airbnb_app/screens/signup.dart';
 import 'package:airbnb_app/authentication/google_authentication.dart';
-import 'package:airbnb_app/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -29,10 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
-      );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
@@ -47,10 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _loginWithGoogle() async {
     try {
       await FirebaseAuthentication().signInWithGoogle();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
@@ -188,12 +179,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   _buildCard(
                     child: Column(
                       children: [
-                        socialIcons(
-                          Icons.facebook,
-                          "Continue with Facebook",
-                          Colors.blue,
-                        ),
-                        const Divider(),
                         InkWell(
                           onTap: _loginWithGoogle,
                           child: socialIcons(
@@ -201,12 +186,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             "Continue with Google",
                             Colors.red,
                           ),
-                        ),
-                        const Divider(),
-                        socialIcons(
-                          Icons.apple,
-                          "Continue with Apple",
-                          Colors.black,
                         ),
                       ],
                     ),

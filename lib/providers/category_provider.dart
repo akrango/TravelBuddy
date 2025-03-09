@@ -8,8 +8,13 @@ class CategoryProvider with ChangeNotifier {
   List<Category> get categories => [..._categories];
 
   CategoryProvider() {
+    _initializeCategories();
+  }
+
+  Future<void> _initializeCategories() async {
     final categoryService = CategoryService();
-    _categories.addAll(categoryService.getCategories());
+    final categories = await categoryService.getCategories();
+    _categories.addAll(categories);
     notifyListeners();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
 import 'package:airbnb_app/providers/place_provider.dart';
+import 'package:airbnb_app/screens/place_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -53,75 +54,102 @@ class FavoriteScreen extends StatelessWidget {
                         ),
                         itemBuilder: (context, index) {
                           String favoriteId = favoriteIds[index];
-                          Place? place = provider.findById(favoriteId);
-
-                          if (place == null) {
-                            return const Center(
-                              child: Text("Error loading place details"),
-                            );
-                          }
-
-                          return Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: NetworkImage(place.image),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 5,
-                                right: 5,
-                                child: Stack(
-                                  alignment: Alignment.center,
+                          return FutureBuilder<Place?>(
+                              future: provider.findById(favoriteId),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+                                if (snapshot.hasError || !snapshot.hasData) {
+                                  return const Center(
+                                      child:
+                                          Text("Error loading place details"));
+                                }
+                                Place? place = snapshot.data;
+                                if (place == null) {
+                                  return const Center(
+                                      child: Text(
+                                          "There are no favorite places yet"));
+                                }
+                                return Stack(
                                   children: [
-                                    const Icon(
-                                      Icons.favorite_outline_rounded,
-                                      size: 30,
-                                      color: Colors.white,
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(15),
+                                        image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: NetworkImage(place.image),
+                                        ),
+                                      ),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PlaceDetailScreen(
+                                                      place: place),
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ),
-                                    InkWell(
-                                      onTap: () {
-                                        Provider.of<FavoriteProvider>(context,
-                                                listen: false)
-                                            .toggleFavorite(place);
-                                      },
-                                      child: Icon(
-                                        Icons.favorite,
-                                        size: 26,
-                                        color: Provider.of<FavoriteProvider>(
-                                                    context,
-                                                    listen: false)
-                                                .isExist(place)
-                                            ? Colors.pinkAccent
-                                            : Colors.black54,
+                                    Positioned(
+                                      top: 5,
+                                      right: 5,
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.favorite_outline_rounded,
+                                            size: 30,
+                                            color: Colors.white,
+                                          ),
+                                          InkWell(
+                                            onTap: () {
+                                              Provider.of<FavoriteProvider>(
+                                                      context,
+                                                      listen: false)
+                                                  .toggleFavorite(place);
+                                            },
+                                            child: Icon(
+                                              Icons.favorite,
+                                              size: 26,
+                                              color:
+                                                  Provider.of<FavoriteProvider>(
+                                                              context,
+                                                              listen: false)
+                                                          .isExist(place)
+                                                      ? Colors.pinkAccent
+                                                      : Colors.black54,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 8,
+                                      left: 8,
+                                      right: 8,
+                                      child: Container(
+                                        color:
+                                            Colors.deepPurple.withOpacity(0.6),
+                                        padding: const EdgeInsets.all(4),
+                                        child: Text(
+                                          place.title,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     ),
                                   ],
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 8,
-                                left: 8,
-                                right: 8,
-                                child: Container(
-                                  color: Colors.deepPurple.withOpacity(0.6),
-                                  padding: const EdgeInsets.all(4),
-                                  child: Text(
-                                    place.title,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
+                                );
+                              });
                         },
                       ),
               ],

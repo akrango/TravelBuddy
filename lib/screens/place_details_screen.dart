@@ -1,6 +1,7 @@
 import 'package:airbnb_app/components/star_rating.dart';
 import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
+import 'package:airbnb_app/screens/reservation_screen.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -134,7 +135,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                           position: _location,
                           infoWindow: InfoWindow(
                             title: widget.place.title,
-                            snippet: "Rating: ${widget.place.rating.toString()}",
+                            snippet:
+                                "Rating: ${widget.place.rating.toString()}",
                           ),
                         ),
                       },
@@ -197,27 +199,40 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
           SizedBox(
             width: size.width * 0.3,
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 35,
-              vertical: 15,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.pink,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: const Text(
-              "Reserve",
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          GestureDetector(
+            onTap: () => _navigateToDateSelection(context, widget.place),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 15),
+              decoration: BoxDecoration(
+                  color: Colors.pink, borderRadius: BorderRadius.circular(15)),
+              child: const Text(
+                "Reserve",
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _navigateToDateSelection(BuildContext context, Place place) async {
+    final selectedDates = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReservationScreen(
+          placeId: place.id,
+        ),
+      ),
+    );
+
+    if (selectedDates != null) {
+      print('Selected Start: ${selectedDates['startDate']}');
+      print('Selected End: ${selectedDates['endDate']}');
+    }
   }
 
   Padding placePropertyList(Size size, image, title, subtitle) {
