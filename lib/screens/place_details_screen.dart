@@ -3,6 +3,7 @@ import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
 import 'package:airbnb_app/screens/reservation_screen.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -243,14 +244,13 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
           const Divider(),
           CircleAvatar(
             backgroundColor: Colors.white,
-            backgroundImage: NetworkImage(image),
+            backgroundImage: CachedNetworkImageProvider(image),
             radius: 29,
           ),
           SizedBox(
             width: size.width * 0.05,
           ),
-          Expanded(
-              child: Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -270,7 +270,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 ),
               )
             ],
-          ))
+          )
         ],
       ),
     );
@@ -368,12 +368,19 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
           ),
           Stack(
             children: [
-              Image.network(
-                "https://wallpapers.com/images/hd/golden-laurel-wreathon-teal-background-k5791qxis5rtcx7w-k5791qxis5rtcx7w.png",
+              CachedNetworkImage(
+                imageUrl:
+                    "https://wallpapers.com/images/hd/golden-laurel-wreathon-teal-background-k5791qxis5rtcx7w-k5791qxis5rtcx7w.png",
                 height: 50,
                 width: 130,
                 color: Colors.amber,
               ),
+
+              // Image.network(
+              //   height: 50,
+              //   width: 130,
+              //   color: Colors.amber,
+              // ),
               const Positioned(
                 left: 35,
                 child: Text(
@@ -418,8 +425,18 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         SizedBox(
           height: size.height * 0.35,
           child: AnotherCarousel(
-            images:
-                widget.place.imageUrls.map((url) => NetworkImage(url)).toList(),
+            images: widget.place.imageUrls
+                .map(
+                  (url) => CachedNetworkImage(
+                    imageUrl: url,
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.broken_image, color: Colors.red),
+                    fit: BoxFit.cover,
+                  ),
+                )
+                .toList(),
             showIndicator: false,
             dotBgColor: Colors.transparent,
             onImageChange: (p0, p1) {

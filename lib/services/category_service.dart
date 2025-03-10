@@ -11,7 +11,6 @@ class CategoryService {
       List<Category> categoriesList = snapshot.docs.map((doc) {
         return Category.fromMap(doc.data() as Map<String, dynamic>, doc.id);
       }).toList();
-    print("categoriesList: $categoriesList"); 
       return categoriesList;
     } catch (e) {
       print("Error fetching categories: $e");

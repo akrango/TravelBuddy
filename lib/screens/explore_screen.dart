@@ -1,6 +1,7 @@
 import 'package:airbnb_app/components/place_card.dart';
 import 'package:airbnb_app/components/search_bar.dart';
 import 'package:airbnb_app/providers/category_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -117,8 +118,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(5.0),
-                              child: Image.network(
-                                categories[index].image,
+                              child: 
+                              CachedNetworkImage(
+                                imageUrl: categories[index].image,
                                 color: selectedIndex == index
                                     ? Colors.white
                                     : Colors.black45,

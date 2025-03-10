@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:airbnb_app/models/reservation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -88,7 +86,7 @@ class Place {
       image: data['image'] ?? '',
       rating: data['rating']?.toDouble() ?? 0.0,
       date: data['date'] ?? '',
-      price: data['price'] ?? 0,
+      price: data['price'] ?? 0,    
       address: data['address'] ?? '',
       vendor: data['vendor'] ?? '',
       vendorProfession: data['vendorProfession'] ?? '',

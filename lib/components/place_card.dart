@@ -1,6 +1,7 @@
 import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
 import 'package:airbnb_app/providers/place_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
@@ -55,7 +56,19 @@ class DisplayPlace extends StatelessWidget {
                               width: double.infinity,
                               child: AnotherCarousel(
                                 images: place.imageUrls
-                                    .map((url) => NetworkImage(url))
+                                    .map(
+                                      (url) => CachedNetworkImage(
+                                        imageUrl: url,
+                                        placeholder: (context, url) =>
+                                            const Center(
+                                                child:
+                                                    CircularProgressIndicator()),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.broken_image,
+                                                color: Colors.red),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
                                     .toList(),
                                 dotSize: 6,
                                 indicatorBgPadding: 5,
@@ -197,7 +210,11 @@ class DisplayPlace extends StatelessWidget {
       left: 10,
       child: CircleAvatar(
         radius: 30,
-        backgroundImage: NetworkImage(place.vendorProfile),
+        backgroundImage: CachedNetworkImageProvider(place.vendorProfile),
+        onBackgroundImageError: (exception, stackTrace) {
+          debugPrint(
+              'Failed to load vendor profile image: ${place.vendorProfile}');
+        },
         backgroundColor: Colors.grey[200],
       ),
     );
