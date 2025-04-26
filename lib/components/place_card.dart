@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
 import 'package:airbnb_app/providers/place_provider.dart';
@@ -55,21 +58,37 @@ class DisplayPlace extends StatelessWidget {
                               height: 375,
                               width: double.infinity,
                               child: AnotherCarousel(
-                                images: place.imageUrls
-                                    .map(
-                                      (url) => CachedNetworkImage(
-                                        imageUrl: url,
-                                        placeholder: (context, url) =>
-                                            const Center(
-                                                child:
-                                                    CircularProgressIndicator()),
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(Icons.broken_image,
-                                                color: Colors.red),
+                                images: place.imageUrls.map((url) {
+                                  if (url.startsWith('http')) {
+                                    return Image.network(
+                                      url,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      },
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const Icon(Icons.broken_image,
+                                                  color: Colors.red),
+                                    );
+                                  } else {
+                                    try {
+                                      Uint8List bytes =
+                                          base64Decode(url.split(',').last);
+                                      return Image.memory(
+                                        bytes,
                                         fit: BoxFit.cover,
-                                      ),
-                                    )
-                                    .toList(),
+                                      );
+                                    } catch (e) {
+                                      return const Icon(Icons.broken_image,
+                                          color: Colors.red);
+                                    }
+                                  }
+                                }).toList(),
                                 dotSize: 6,
                                 indicatorBgPadding: 5,
                                 dotBgColor: Colors.transparent,
@@ -162,13 +181,6 @@ class DisplayPlace extends StatelessWidget {
                         style: const TextStyle(
                           color: Colors.black54,
                           fontSize: 16.5,
-                        ),
-                      ),
-                      Text(
-                        place.date,
-                        style: const TextStyle(
-                          fontSize: 16.5,
-                          color: Colors.black54,
                         ),
                       ),
                       SizedBox(height: size.height * 0.007),

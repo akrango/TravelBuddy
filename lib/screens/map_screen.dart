@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -93,19 +95,31 @@ class _MapScreenState extends State<MapScreen> {
               SizedBox(
                 height: size.height * 0.203,
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25),
-                  ),
-                  child: AnotherCarousel(
-                    images: data['imageUrls']
-                        .map((url) => NetworkImage(url))
-                        .toList(),
-                    dotSize: 5,
-                    indicatorBgPadding: 5,
-                    dotBgColor: Colors.transparent,
-                  ),
-                ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(25),
+                      topRight: Radius.circular(25),
+                    ),
+                    child: AnotherCarousel(
+                      images: data['imageUrls']?.map((url) {
+                            if (url.startsWith('http')) {
+                              return NetworkImage(url);
+                            } else {
+                              try {
+                                final decodedBytes =
+                                    base64Decode(url.split(',').last);
+                                return MemoryImage(
+                                    Uint8List.fromList(decodedBytes));
+                              } catch (e) {
+                                return const Icon(Icons.broken_image,
+                                    color: Colors.red);
+                              }
+                            }
+                          }).toList() ??
+                          [],
+                      dotSize: 5,
+                      indicatorBgPadding: 5,
+                      dotBgColor: Colors.transparent,
+                    )),
               ),
               Positioned(
                 top: 10,
@@ -147,7 +161,8 @@ class _MapScreenState extends State<MapScreen> {
                 Row(
                   children: [
                     Text(
-                      data["address"],
+                      data["address"] ??
+                          "Address not available",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -156,11 +171,13 @@ class _MapScreenState extends State<MapScreen> {
                     const Spacer(),
                     const Icon(Icons.star),
                     const SizedBox(width: 5),
-                    Text(data['rating'].toString()),
+                    Text(data['rating']?.toString() ??
+                        "N/A"),
                   ],
                 ),
                 Text(
-                  data['date'],
+                  data['date'] ??
+                      "Date not available",
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black54,
@@ -168,7 +185,8 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 Text.rich(
                   TextSpan(
-                    text: '\$${data['price']} ',
+                    text:
+                        '\$${data['price'] ?? 'N/A'} ',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

@@ -3,7 +3,7 @@ import 'package:airbnb_app/services/place_service.dart';
 import 'package:flutter/material.dart';
 
 class PlaceProvider with ChangeNotifier {
-  List<Place> _places = [];
+  final List<Place> _places = [];
 
   List<Place> get places => _places;
   final PlaceService _placeService = PlaceService();

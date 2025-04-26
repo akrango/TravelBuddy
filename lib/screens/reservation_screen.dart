@@ -8,7 +8,7 @@ import '../models/reservation.dart';
 class ReservationScreen extends StatefulWidget {
   final Place place;
 
-  const ReservationScreen({Key? key, required this.place}) : super(key: key);
+  const ReservationScreen({super.key, required this.place});
 
   @override
   State<ReservationScreen> createState() => _ReservationScreenState();

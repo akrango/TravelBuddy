@@ -1,12 +1,18 @@
+import 'dart:convert';
 import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
 import 'package:airbnb_app/providers/place_provider.dart';
 import 'package:airbnb_app/screens/place_details_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class FavoriteScreen extends StatelessWidget {
   const FavoriteScreen({super.key});
+
+  bool isBase64(String imageString) {
+    return imageString.startsWith('data:image');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +79,26 @@ class FavoriteScreen extends StatelessWidget {
                                       child: Text(
                                           "There are no favorite places yet"));
                                 }
+                                ImageProvider imageProvider;
+
+                                if (place.image.startsWith('http')) {
+                                  imageProvider = CachedNetworkImageProvider(
+                                    place.image,
+                                  );
+                                } else {
+                                  try {
+                                    final base64String =
+                                        place.image.split(',').last;
+                                    final bytes = base64Decode(base64String);
+                                   imageProvider =MemoryImage(
+                                      bytes,
+                                    );
+                                  } catch (e) {
+                                    return const Icon(Icons.broken_image,
+                                        color: Colors.red);
+                                  }
+                                }
+
                                 return Stack(
                                   children: [
                                     Container(
@@ -80,7 +106,7 @@ class FavoriteScreen extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(15),
                                         image: DecorationImage(
                                           fit: BoxFit.cover,
-                                          image: NetworkImage(place.image),
+                                          image: imageProvider,
                                         ),
                                       ),
                                       child: GestureDetector(

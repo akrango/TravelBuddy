@@ -7,7 +7,6 @@ class Place {
   bool isActive;
   final String image;
   final double rating;
-  final String date;
   final int price;
   final String address;
   final String vendor;
@@ -32,7 +31,6 @@ class Place {
     required this.isActive,
     required this.image,
     required this.rating,
-    required this.date,
     required this.price,
     required this.address,
     required this.vendor,
@@ -58,7 +56,6 @@ class Place {
       'isActive': isActive,
       'image': image,
       'rating': rating,
-      'date': date,
       'price': price,
       'address': address,
       'vendor': vendor,
@@ -85,7 +82,6 @@ class Place {
       isActive: data['isActive'] ?? false,
       image: data['image'] ?? '',
       rating: data['rating']?.toDouble() ?? 0.0,
-      date: data['date'] ?? '',
       price: data['price'] ?? 0,    
       address: data['address'] ?? '',
       vendor: data['vendor'] ?? '',
@@ -131,7 +127,6 @@ final List<Place> listOfPlaces = [
     rating: 4.72,
     review: 89,
     bedAndBathroom: "2 beds · Private bathroom",
-    date: "Mar 15-20",
     price: 50,
     address: "Devon, England",
     vendor: "Eleanor",
@@ -169,7 +164,6 @@ final List<Place> listOfPlaces = [
     rating: 4.85,
     review: 215,
     bedAndBathroom: "1 bed · Ensuite bathroom",
-    date: "Apr 05-10",
     price: 75,
     address: "Chicago, USA",
     vendor: "Damien",
@@ -209,7 +203,6 @@ final List<Place> listOfPlaces = [
     rating: 4.90,
     review: 320,
     bedAndBathroom: "3 beds · 2 bathrooms",
-    date: "Jun 10-16",
     price: 120,
     address: "Maui, Hawaii",
     vendor: "Lila",
@@ -249,7 +242,6 @@ final List<Place> listOfPlaces = [
     rating: 4.67,
     review: 180,
     bedAndBathroom: "4 beds · 3 bathrooms",
-    date: "Dec 20-27",
     price: 200,
     address: "Aspen, USA",
     vendor: "Jonas",

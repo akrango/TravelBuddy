@@ -1,6 +1,8 @@
 import 'package:airbnb_app/providers/favorite_provider.dart';
+import 'package:airbnb_app/providers/host_places_provider.dart';
 import 'package:airbnb_app/providers/place_provider.dart';
 import 'package:airbnb_app/providers/category_provider.dart';
+import 'package:airbnb_app/providers/user_provider.dart';
 import 'package:airbnb_app/screens/login.dart';
 import 'package:airbnb_app/screens/main_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,7 +18,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -24,6 +26,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => PlaceProvider()),
         ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => HostPlacesProvider()),
       ],
       child: MaterialApp(
         title: 'Travel Buddy',
@@ -39,7 +43,7 @@ class MyApp extends StatelessWidget {
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -56,12 +60,12 @@ class AuthWrapper extends StatelessWidget {
 
 class MainScaffold extends StatelessWidget {
   const MainScaffold({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 50, 
+        toolbarHeight: 50,
         title: const Text("Travel Buddy"),
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
@@ -74,7 +78,7 @@ class MainScaffold extends StatelessWidget {
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -101,4 +105,3 @@ class AppDrawer extends StatelessWidget {
     );
   }
 }
-

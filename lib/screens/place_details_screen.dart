@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:airbnb_app/components/star_rating.dart';
 import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
@@ -187,14 +188,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   ],
                 ),
               ),
-              Text(
-                widget.place.date,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
-                ),
-              )
             ],
           ),
           SizedBox(
@@ -236,41 +229,46 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     }
   }
 
-  Padding placePropertyList(Size size, image, title, subtitle) {
+  Padding placePropertyList(
+      Size size, String image, String title, String subtitle) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(),
           CircleAvatar(
             backgroundColor: Colors.white,
             backgroundImage: CachedNetworkImageProvider(image),
             radius: 29,
           ),
-          SizedBox(
-            width: size.width * 0.05,
+          SizedBox(width: size.width * 0.05),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  style: TextStyle(
+                    fontSize: size.width * 0.0346,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ],
+            ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                subtitle,
-                softWrap: true,
-                overflow: TextOverflow.visible,
-                style: TextStyle(
-                  fontSize: size.width * 0.0346,
-                  color: Colors.grey.shade700,
-                ),
-              )
-            ],
-          )
         ],
       ),
     );
@@ -351,7 +349,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Column(
             children: [
@@ -366,54 +364,27 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               StarRating(rating: widget.place.rating),
             ],
           ),
-          Stack(
-            children: [
-              CachedNetworkImage(
-                imageUrl:
-                    "https://wallpapers.com/images/hd/golden-laurel-wreathon-teal-background-k5791qxis5rtcx7w-k5791qxis5rtcx7w.png",
-                height: 50,
-                width: 130,
-                color: Colors.amber,
-              ),
-
-              // Image.network(
-              //   height: 50,
-              //   width: 130,
-              //   color: Colors.amber,
-              // ),
-              const Positioned(
-                left: 35,
-                child: Text(
-                  "Guest\nfavorite",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
-                    color: Colors.black,
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Text(
+                    widget.place.review.toString(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          Column(
-            children: [
-              Text(
-                widget.place.review.toString(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
-                ),
-              ),
-              const Text(
-                "Reviews",
-                style: TextStyle(
-                  height: 0.7,
-                  color: Colors.black,
-                  decoration: TextDecoration.underline,
-                ),
-              )
-            ],
-          )
+                  const Text(
+                    "Reviews",
+                    style: TextStyle(
+                      height: 0.7,
+                      color: Colors.black,
+                      decoration: TextDecoration.underline,
+                    ),
+                  )
+                ],
+              ))
         ],
       ),
     );
@@ -425,18 +396,29 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         SizedBox(
           height: size.height * 0.35,
           child: AnotherCarousel(
-            images: widget.place.imageUrls
-                .map(
-                  (url) => CachedNetworkImage(
-                    imageUrl: url,
-                    placeholder: (context, url) =>
-                        const Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.broken_image, color: Colors.red),
+            images: widget.place.imageUrls.map((url) {
+              if (url.startsWith('http')) {
+                return CachedNetworkImage(
+                  imageUrl: url,
+                  placeholder: (context, url) =>
+                      const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) =>
+                      const Icon(Icons.broken_image, color: Colors.red),
+                  fit: BoxFit.cover,
+                );
+              } else {
+                try {
+                  final base64String = url.split(',').last;
+                  final bytes = base64Decode(base64String);
+                  return Image.memory(
+                    bytes,
                     fit: BoxFit.cover,
-                  ),
-                )
-                .toList(),
+                  );
+                } catch (e) {
+                  return const Icon(Icons.broken_image, color: Colors.red);
+                }
+              }
+            }).toList(),
             showIndicator: false,
             dotBgColor: Colors.transparent,
             onImageChange: (p0, p1) {

@@ -1,8 +1,10 @@
+import 'package:airbnb_app/providers/user_provider.dart';
 import 'package:airbnb_app/screens/signup.dart';
 import 'package:airbnb_app/authentication/google_authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,13 +31,20 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.message}')),
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      final userProvider = Provider.of<UserProvider>(context);
+      await userProvider.fetchUserRole();
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -43,10 +52,14 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await FirebaseAuthentication().signInWithGoogle();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     }
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.fetchUserRole();
   }
 
   @override
@@ -130,7 +143,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         _isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : ElevatedButton(
-                                onPressed: _loginWithEmailPassword,
+                                onPressed: () =>
+                                    _loginWithEmailPassword(),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.deepPurple,
                                   padding:
@@ -180,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       children: [
                         InkWell(
-                          onTap: _loginWithGoogle,
+                          onTap: () => _loginWithGoogle(),
                           child: socialIcons(
                             FontAwesomeIcons.google,
                             "Continue with Google",

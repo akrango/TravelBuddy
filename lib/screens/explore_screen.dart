@@ -46,9 +46,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         const SizedBox(height: 20),
                         ValueListenableBuilder<int>(
                           valueListenable: selectedIndexNotifier,
-                           builder: (context, selectedIndex, child) {
-                            String selectedCategoryId = categoryProvider.categories[selectedIndex].id;
-                            return DisplayPlace(selectedCategoryId: selectedCategoryId);
+                          builder: (context, selectedIndex, child) {
+                            String selectedCategoryId =
+                                categoryProvider.categories[selectedIndex].id;
+                            return DisplayPlace(
+                                selectedCategoryId: selectedCategoryId);
                           },
                         ),
                       ],
@@ -118,8 +120,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(5.0),
-                              child: 
-                              CachedNetworkImage(
+                              child: CachedNetworkImage(
                                 imageUrl: categories[index].image,
                                 color: selectedIndex == index
                                     ? Colors.white

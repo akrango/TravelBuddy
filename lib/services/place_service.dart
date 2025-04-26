@@ -30,7 +30,7 @@ class PlaceService {
       }
     } catch (e) {
       print("Error fetching place by ID: $e");
-      throw e;
+      rethrow;
     }
   }
 
