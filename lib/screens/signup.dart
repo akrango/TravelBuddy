@@ -1,11 +1,16 @@
 import 'package:airbnb_app/models/user.dart';
+import 'package:airbnb_app/providers/user_provider.dart';
 import 'package:airbnb_app/screens/login.dart';
 import 'package:airbnb_app/screens/main_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -18,27 +23,82 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final TextEditingController _displayNameController = TextEditingController();
+  final TextEditingController _professionController = TextEditingController();
+  final TextEditingController _yearsOfHostingController =
+      TextEditingController();
 
   bool _isLoading = false;
   String _selectedRole = 'guest';
+  File? _imageFile;
 
-  Future<void> _addUserToFirestore(User user) async {
+  Future<void> _addUserToFirestore(User user, String? imageUrl) async {
     final userDoc = _firestore.collection('users').doc(user.uid);
     final userExists = await userDoc.get();
 
     if (!userExists.exists) {
       final newUser = UserModel(
-          uid: user.uid,
-          email: user.email ?? '',
-          role: _selectedRole,
-          displayName: user.displayName ?? '',
-          photoURL: user.photoURL ?? '');
+        uid: user.uid,
+        email: user.email ?? '',
+        role: _selectedRole,
+        displayName: _displayNameController.text,
+        photoURL: imageUrl ?? '',
+        profession: _professionController.text.isEmpty
+            ? null
+            : _professionController.text,
+        yearsOfHosting: _yearsOfHostingController.text.isNotEmpty
+            ? int.tryParse(_yearsOfHostingController.text)
+            : null,
+      );
       await userDoc.set(newUser.toMap());
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<String?> _uploadImageToFirebase() async {
+    if (_imageFile == null) return null;
+
+    try {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      Reference storageRef = _storage.ref().child('profile_pictures/$fileName');
+      UploadTask uploadTask = storageRef.putFile(_imageFile!);
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to upload image: $e")),
+      );
+      return null;
     }
   }
 
@@ -151,6 +211,131 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
+                        const Text(
+                          "Display Name",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _displayNameController,
+                          decoration: InputDecoration(
+                            prefixIcon:
+                                Icon(Icons.person, color: Colors.deepPurple),
+                            hintText: "Enter your display name",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          "Choose a Profile Picture",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _imageFile == null
+                            ? ElevatedButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text("Choose an option"),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            ListTile(
+                                              leading: const Icon(Icons.camera),
+                                              title: const Text("Take a photo"),
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                                _takePhoto();
+                                              },
+                                            ),
+                                            ListTile(
+                                              leading: const Icon(Icons.photo),
+                                              title: const Text(
+                                                  "Pick from gallery"),
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                                _pickImage();
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Select Photo",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              )
+                            : CircleAvatar(
+                                radius: 50,
+                                backgroundImage: FileImage(_imageFile!),
+                              ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          "Profession (optional)",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _professionController,
+                          decoration: InputDecoration(
+                            prefixIcon:
+                                Icon(Icons.work, color: Colors.deepPurple),
+                            hintText: "Enter your profession (optional)",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          "Years of Hosting (optional)",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _yearsOfHostingController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.calendar_today,
+                                color: Colors.deepPurple),
+                            hintText: "Enter your years of hosting",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         ElevatedButton(
                           onPressed:
                               _isLoading ? null : _signUpWithEmailPassword,
@@ -173,39 +358,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     color: Colors.white,
                                   ),
                                 ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          "Sign up as",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.deepPurple,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        DropdownButtonFormField<String>(
-                          value: _selectedRole,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'guest',
-                              child: Text('Guest'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'host',
-                              child: Text('Host'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedRole = value!;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
                         ),
                       ],
                     ),
@@ -317,8 +469,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: _passwordController.text,
       );
 
-      await _addUserToFirestore(userCredential.user!);
+      String? imageUrl;
+      if (_imageFile != null) {
+        imageUrl = await _uploadImageToFirebase();
+      }
 
+      await _addUserToFirestore(userCredential.user!, imageUrl);
+
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      await userProvider.fetchUserRole();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
@@ -350,7 +509,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         UserCredential userCredential =
             await _auth.signInWithCredential(credential);
 
-        await _addUserToFirestore(userCredential.user!);
+        await _addUserToFirestore(userCredential.user!, null);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        await userProvider.fetchUserRole();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainScreen()),

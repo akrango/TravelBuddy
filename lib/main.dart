@@ -1,10 +1,13 @@
+import 'package:airbnb_app/models/user.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
 import 'package:airbnb_app/providers/host_places_provider.dart';
 import 'package:airbnb_app/providers/place_provider.dart';
 import 'package:airbnb_app/providers/category_provider.dart';
 import 'package:airbnb_app/providers/user_provider.dart';
+import 'package:airbnb_app/screens/host_dashboard.dart';
 import 'package:airbnb_app/screens/login.dart';
 import 'package:airbnb_app/screens/main_screen.dart';
+import 'package:airbnb_app/screens/user_profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -81,6 +84,8 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    UserModel? user = Provider.of<UserProvider>(context).user;
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -100,6 +105,32 @@ class AppDrawer extends StatelessWidget {
               Navigator.pop(context);
             },
           ),
+          if (user != null)
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Profile'),
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserProfileScreen(user: user),
+                  ),
+                );
+              },
+            ),
+          if (user != null && user.role == 'host')
+            ListTile(
+              leading: const Icon(Icons.business),
+              title: const Text('My Listings'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HostDashboardScreen(),
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );

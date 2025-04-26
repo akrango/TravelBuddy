@@ -1,6 +1,5 @@
 import 'package:airbnb_app/screens/explore_screen.dart';
 import 'package:airbnb_app/screens/favorite_screen.dart';
-import 'package:airbnb_app/screens/host_dashboard.dart';
 import 'package:airbnb_app/screens/map_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +20,6 @@ class _MainScreenState extends State<MainScreen> {
       const ExploreScreen(),
       const FavoriteScreen(),
       const MapScreen(),
-      const HostDashboardScreen(),
     ];
 
     super.initState();
@@ -113,24 +111,6 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
               label: "Map",
-            ),
-            BottomNavigationBarItem(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: selectedIndex == 3
-                      ? Colors.deepPurple.withOpacity(0.2)
-                      : Colors.transparent,
-                ),
-                child: Image.asset(
-                  "assets/images/host.png",
-                  height: 30,
-                  color:
-                      selectedIndex == 3 ? Colors.deepPurple : Colors.black45,
-                ),
-              ),
-              label: "Host",
             ),
           ],
         ),

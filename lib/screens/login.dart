@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } finally {
-      final userProvider = Provider.of<UserProvider>(context);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
       await userProvider.fetchUserRole();
 
       if (mounted) {
