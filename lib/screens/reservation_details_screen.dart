@@ -66,7 +66,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  Image.network(widget.place.image ?? ""),
+                  Image.network(widget.place.image),
                   const SizedBox(height: 12),
                   Text(
                     widget.place.description,

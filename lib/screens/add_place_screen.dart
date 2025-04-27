@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:airbnb_app/models/category.dart';
-import 'package:airbnb_app/models/user.dart';
 import 'package:airbnb_app/providers/host_places_provider.dart';
+import 'package:airbnb_app/providers/user_provider.dart';
 import 'package:airbnb_app/screens/location_picker_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
@@ -105,31 +103,17 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           .showSnackBar(SnackBar(content: Text("Please select a location.")));
       return;
     }
-
-     if (_selectedCategories.isEmpty) {
+    if (_selectedCategories.isEmpty) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Please select a category.")));
       return;
     }
+
     setState(() {
       _isUploadingImage = true;
     });
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      if (!userDoc.exists) {
-        throw Exception("User not found");
-      }
-
-      final userData =
-          UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
-
       _uploadedImageUrls.clear();
       for (var imageFile in _imageFiles) {
         String filename = '${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -137,33 +121,30 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         _uploadedImageUrls.add(imageUrl);
       }
 
-      await FirebaseFirestore.instance.collection('places').add({
-        'title': _titleController.text,
-        'price': int.parse(_priceController.text),
-        'address': _selectedAddress,
-        'description': _descriptionController.text,
-        'hostId': user.uid,
-        'maxPeople': int.parse(_maxPeopleController.text),
-        'bedAndBathroom': _bedAndBathroomController.text,
-        'latitude': _selectedLatitude,
-        'longitude': _selectedLongitude,
-        'image': _uploadedImageUrls[0],
-        'imageUrls': _uploadedImageUrls,
-        'amenities': _selectedAmenities,
-        'categories':
-            _selectedCategories.map((category) => category.id).toList(),
-        'vendor': userData.displayName,
-        'vendorProfile': userData.photoURL,
-        'vendorProfession': userData.profession,
-        "yearsOfHosting": userData.yearsOfHosting,
-      });
+      await Provider.of<HostPlacesProvider>(context, listen: false).savePlace(
+        title: _titleController.text,
+        price: int.parse(_priceController.text),
+        address: _selectedAddress,
+        description: _descriptionController.text,
+        maxPeople: int.parse(_maxPeopleController.text),
+        bedAndBathroom: _bedAndBathroomController.text,
+        latitude: _selectedLatitude ?? 0.0,
+        longitude: _selectedLongitude ?? 0.0,
+        imageUrls: _uploadedImageUrls,
+        amenities: _selectedAmenities,
+        categoryIds: _selectedCategories.map((cat) => cat.id).toList(),
+      );
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Place added successfully!")));
 
-      Provider.of<HostPlacesProvider>(context, listen: false)
-          .fetchHostPlaces(context);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      await context
+          .read<HostPlacesProvider>()
+          .fetchHostPlaces(isHost: userProvider.isHost);
 
+      if (!mounted) return;
       Navigator.pop(context);
     } catch (e) {
       print("Error saving place: $e");

@@ -152,8 +152,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                           position: _location,
                           infoWindow: InfoWindow(
                             title: widget.place.title,
-                            snippet:
-                                "Rating: ${widget.place.rating.toString()}",
                           ),
                         ),
                       },
@@ -174,7 +172,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 ),
               ),
             ),
-            if (reviews == null || reviews.isEmpty)
+            if (reviews.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25),
                 child: Text("No reviews yet. Be the first to leave a review."),

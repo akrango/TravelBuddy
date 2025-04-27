@@ -1,5 +1,6 @@
 import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/providers/host_places_provider.dart';
+import 'package:airbnb_app/providers/user_provider.dart';
 import 'package:airbnb_app/screens/add_place_screen.dart';
 import 'package:airbnb_app/screens/place_details_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -11,6 +12,7 @@ class HostDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text("My Places"),
@@ -18,7 +20,7 @@ class HostDashboardScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: FutureBuilder(
-          future: Provider.of<HostPlacesProvider>(context, listen: false).fetchHostPlaces(context),
+          future: Provider.of<HostPlacesProvider>(context, listen: false).fetchHostPlaces(isHost: userProvider.isHost),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());

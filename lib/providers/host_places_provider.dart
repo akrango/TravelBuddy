@@ -1,37 +1,54 @@
-import 'package:airbnb_app/providers/user_provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:airbnb_app/services/host_service.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:airbnb_app/models/place.dart';
-import 'package:provider/provider.dart';
 
 class HostPlacesProvider with ChangeNotifier {
   List<Place> _hostPlaces = [];
 
   List<Place> get hostPlaces => _hostPlaces;
+  final HostService _hostService = HostService();
 
-  Future<void> fetchHostPlaces(BuildContext context) async {
+  Future<void> fetchHostPlaces({required bool isHost}) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      if (!userProvider.isHost) return;
-
-      final snapshot = await FirebaseFirestore.instance
-          .collection('places')
-          .where('hostId', isEqualTo: user.uid)
-          .get();
-
-      final places = await Future.wait(snapshot.docs.map((doc) async {
-        final data = doc.data();
-        return Place.fromMap(data, doc.id);
-      }).toList());
-
-      _hostPlaces = places;
+      _hostPlaces.clear();
+      List<Place> fetchedPlaces = await _hostService.fetchHostPlaces(isHost: isHost);
+      _hostPlaces.addAll(fetchedPlaces);
       notifyListeners();
     } catch (e) {
-      debugPrint('Error fetching host places: $e');
+      print("Error fetching places: $e");
+    }
+  }
+
+  Future<void> savePlace({
+    required String title,
+    required int price,
+    required String address,
+    required String description,
+    required int maxPeople,
+    required String bedAndBathroom,
+    required double latitude,
+    required double longitude,
+    required List<String> imageUrls,
+    required List<String> amenities,
+    required List<String> categoryIds,
+  }) async {
+    try {
+      await _hostService.savePlace(
+        title: title,
+        price: price,
+        address: address,
+        description: description,
+        maxPeople: maxPeople,
+        bedAndBathroom: bedAndBathroom,
+        latitude: latitude,
+        longitude: longitude,
+        imageUrls: imageUrls,
+        amenities: amenities,
+        categoryIds: categoryIds,
+      );
+      notifyListeners();
+    } catch (e) {
+      print("Error saving place: $e");
     }
   }
 }
