@@ -171,9 +171,7 @@ class DisplayPlace extends StatelessWidget {
                             ),
                           ),
                           const Spacer(),
-                          const Icon(Icons.star),
                           const SizedBox(width: 5),
-                          Text(place.rating.toString()),
                         ],
                       ),
                       Text(

@@ -6,7 +6,6 @@ class Place {
   final String title;
   bool isActive;
   final String image;
-  final double rating;
   final int price;
   final String address;
   final String vendor;
@@ -30,7 +29,6 @@ class Place {
     required this.title,
     required this.isActive,
     required this.image,
-    required this.rating,
     required this.price,
     required this.address,
     required this.vendor,
@@ -55,7 +53,6 @@ class Place {
       'title': title,
       'isActive': isActive,
       'image': image,
-      'rating': rating,
       'price': price,
       'address': address,
       'vendor': vendor,
@@ -81,7 +78,6 @@ class Place {
       title: data['title'] ?? '',
       isActive: data['isActive'] ?? false,
       image: data['image'] ?? '',
-      rating: data['rating']?.toDouble() ?? 0.0,
       price: data['price'] ?? 0,    
       address: data['address'] ?? '',
       vendor: data['vendor'] ?? '',
@@ -124,7 +120,6 @@ final List<Place> listOfPlaces = [
     title: "Charming Cottage in Serene Countryside",
     image:
         "https://www.vertuliving.com/cdn/shop/articles/935082_Cropped.jpg?v=1720694833&width=1500",
-    rating: 4.72,
     review: 89,
     bedAndBathroom: "2 beds · Private bathroom",
     price: 50,
@@ -161,7 +156,6 @@ final List<Place> listOfPlaces = [
     title: "Modern Studio in the Heart of the City",
     image:
         "https://cf.bstatic.com/xdata/images/hotel/max1024x768/151199952.jpg?k=b3de0ed370fed0d4702957e03ee44fd9137b3450cea1a5540a7c86d65245a742&o=&hp=1",
-    rating: 4.85,
     review: 215,
     bedAndBathroom: "1 bed · Ensuite bathroom",
     price: 75,
@@ -200,7 +194,6 @@ final List<Place> listOfPlaces = [
     title: "Beachside Bungalow with Ocean Views",
     image:
         "https://a0.muscache.com/im/pictures/miso/Hosting-1027670816422613042/original/a03a8931-a429-47b1-997a-cfbb17d6cb53.jpeg?im_w=720&im_format=avif",
-    rating: 4.90,
     review: 320,
     bedAndBathroom: "3 beds · 2 bathrooms",
     price: 120,
@@ -239,7 +232,6 @@ final List<Place> listOfPlaces = [
     title: "Mountain Chalet with Stunning Views",
     image:
         "https://www.alpsinluxury.com/blog/wp-content/uploads/2021/02/Image00035.jpg",
-    rating: 4.67,
     review: 180,
     bedAndBathroom: "4 beds · 3 bathrooms",
     price: 200,

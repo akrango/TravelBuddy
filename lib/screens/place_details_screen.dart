@@ -1,6 +1,8 @@
 import 'dart:convert';
-import 'package:airbnb_app/components/star_rating.dart';
+import 'package:airbnb_app/components/review_card.dart';
 import 'package:airbnb_app/models/place.dart';
+import 'package:airbnb_app/models/review.dart';
+import 'package:airbnb_app/services/review_service.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
 import 'package:airbnb_app/screens/reservation_screen.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
@@ -20,11 +22,28 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   int currentIndex = 0;
   GoogleMapController? _mapController;
   late LatLng _location;
+  double averageRating = 0.0;
+  List<Review> reviews = [];
 
   @override
   void initState() {
     super.initState();
     _location = LatLng(widget.place.latitude, widget.place.longitude);
+    _loadPlaceData();
+  }
+
+  Future<void> _loadPlaceData() async {
+    final reviewService = ReviewService();
+
+    double avgRating =
+        await reviewService.getAverageRatingForPlace(widget.place.id);
+    List<Review> placeReviews =
+        await reviewService.getReviewsForPlace(widget.place.id);
+
+    setState(() {
+      averageRating = avgRating;
+      reviews = placeReviews;
+    });
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -76,14 +95,10 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 ],
               ),
             ),
-            widget.place.isActive == true
-                ? ratingAndStarTrue()
-                : ratingAndStarFalse(),
+            ratingAndStar(),
             SizedBox(height: size.height * 0.02),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 25,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -144,10 +159,38 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25),
+              child: Text(
+                "Reviews",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            if (reviews == null || reviews.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 25),
+                child: Text("No reviews yet. Be the first to leave a review."),
+              )
+            else
+              Column(
+                children: reviews.map((review) {
+                  return ReviewCard(
+                    userId: review.userId,
+                    createdAt: review.createdAt,
+                    rating: review.rating,
+                    reviewText: review.reviewText,
+                  );
+                }).toList(),
+              ),
+            SizedBox(height: 100),
           ],
         ),
       ),
@@ -306,85 +349,29 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     );
   }
 
-  Padding ratingAndStarFalse() => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.star),
-            const SizedBox(width: 5),
-            Text(
-              "${widget.place.rating.toString()} . ",
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              "${widget.place.review.toString()}reviews",
-              style: const TextStyle(
-                fontSize: 17,
-                decoration: TextDecoration.underline,
-                fontWeight: FontWeight.w500,
-              ),
-            )
-          ],
-        ),
-      );
-
-  Container ratingAndStarTrue() {
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 13,
-        vertical: 5,
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 15,
-      ),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.black26,
-        ),
-        borderRadius: BorderRadius.circular(15),
-      ),
+  Padding ratingAndStar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              Text(
-                widget.place.rating.toString(),
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  height: 1,
-                ),
-              ),
-              StarRating(rating: widget.place.rating),
-            ],
+          const Icon(Icons.star),
+          const SizedBox(width: 5),
+          Text(
+            "${averageRating.toStringAsFixed(1)} . ",
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  Text(
-                    widget.place.review.toString(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 17,
-                    ),
-                  ),
-                  const Text(
-                    "Reviews",
-                    style: TextStyle(
-                      height: 0.7,
-                      color: Colors.black,
-                      decoration: TextDecoration.underline,
-                    ),
-                  )
-                ],
-              ))
+          Text(
+            "${reviews.length} reviews",
+            style: const TextStyle(
+              fontSize: 17,
+              decoration: TextDecoration.underline,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );

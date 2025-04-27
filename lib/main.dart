@@ -8,6 +8,7 @@ import 'package:airbnb_app/screens/host_dashboard.dart';
 import 'package:airbnb_app/screens/login.dart';
 import 'package:airbnb_app/screens/main_screen.dart';
 import 'package:airbnb_app/screens/user_profile_screen.dart';
+import 'package:airbnb_app/screens/reservations_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -127,6 +128,19 @@ class AppDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const HostDashboardScreen(),
+                  ),
+                );
+              },
+            ),
+          if (user != null)
+            ListTile(
+              leading: const Icon(Icons.list),
+              title: const Text('My Reservations'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReservationsListScreen(),
                   ),
                 );
               },
