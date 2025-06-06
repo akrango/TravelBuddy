@@ -37,6 +37,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isLoading = false;
   String _selectedRole = 'guest';
   File? _imageFile;
+  bool _isGoogleLoading = false;
 
   Future<void> _addUserToFirestore(User user, String? imageUrl) async {
     final userDoc = _firestore.collection('users').doc(user.uid);
@@ -242,52 +243,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         const SizedBox(height: 10),
                         _imageFile == null
-                            ? ElevatedButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: const Text("Choose an option"),
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            ListTile(
-                                              leading: const Icon(Icons.camera),
-                                              title: const Text("Take a photo"),
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                                _takePhoto();
-                                              },
-                                            ),
-                                            ListTile(
-                                              leading: const Icon(Icons.photo),
-                                              title: const Text(
-                                                  "Pick from gallery"),
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                                _pickImage();
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.deepPurple,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                            ? SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: const Text("Choose an option"),
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ListTile(
+                                                leading:
+                                                    const Icon(Icons.camera),
+                                                title:
+                                                    const Text("Take a photo"),
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                  _takePhoto();
+                                                },
+                                              ),
+                                              ListTile(
+                                                leading:
+                                                    const Icon(Icons.photo),
+                                                title: const Text(
+                                                    "Pick from gallery"),
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                  _pickImage();
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.deepPurple,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
                                   ),
-                                ),
-                                child: const Text(
-                                  "Select Photo",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              )
+                                  child: const Text(
+                                    "Select Photo",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ))
                             : CircleAvatar(
                                 radius: 50,
                                 backgroundImage: FileImage(_imageFile!),
@@ -336,28 +342,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed:
-                              _isLoading ? null : _signUpWithEmailPassword,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed:
+                                _isLoading ? null : _signUpWithEmailPassword,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurple,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
-                          ),
-                          child: _isLoading
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white,
-                                )
-                              : const Text(
-                                  "Sign Up",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                            child: _isLoading
+                                ? const CircularProgressIndicator(
                                     color: Colors.white,
+                                  )
+                                : const Text(
+                                    "Sign Up",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
+                          ),
                         ),
                       ],
                     ),
@@ -390,14 +399,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   _buildCard(
                     child: Column(
                       children: [
+                        const SizedBox(height: 20),
                         InkWell(
-                          onTap: _signUpWithGoogle,
-                          child: socialIcons(
-                            FontAwesomeIcons.google,
-                            "Continue with Google",
-                            Colors.red,
-                          ),
+                          onTap: _isGoogleLoading
+                              ? null
+                              : () => _signUpWithGoogle(),
+                          child: _isGoogleLoading
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.deepPurple,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(FontAwesomeIcons.google,
+                                        color: Colors.red),
+                                    const SizedBox(width: 10),
+                                    const Text(
+                                      "Continue with Google",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.deepPurple,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -495,7 +528,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _signUpWithGoogle() async {
     setState(() {
-      _isLoading = true;
+      _isGoogleLoading = true;
     });
 
     try {
@@ -523,7 +556,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
     } finally {
       setState(() {
-        _isLoading = false;
+        _isGoogleLoading = false;
       });
     }
   }

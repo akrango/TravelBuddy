@@ -119,25 +119,31 @@ class _SearchBarAndFilterState extends State<SearchBarAndFilter> {
             _isFocused || _searchQuery.isNotEmpty
                 ? places.isEmpty
                     ? const Center(child: Text("No places available"))
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: getFilteredPlaces(places).length,
-                        itemBuilder: (context, index) {
-                          var place = getFilteredPlaces(places)[index];
-                          return ListTile(
-                            leading: Image.network(place.image),
-                            title: Text(place.title),
-                            subtitle: Text(place.address),
-                            trailing: Icon(Icons.star, color: Colors.yellow),
-                            onTap: () => {
-                              Navigator.push(
+                    : SizedBox(
+                        height:
+                           170,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: getFilteredPlaces(places).length,
+                          itemBuilder: (context, index) {
+                            var place = getFilteredPlaces(places)[index];
+                            return ListTile(
+                              leading: Image.network(place.image),
+                              title: Text(place.title),
+                              subtitle: Text(place.address),
+                              trailing: Icon(Icons.star, color: Colors.yellow),
+                              onTap: () => {
+                                Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          PlaceDetailScreen(place: place))),
-                            },
-                          );
-                        },
+                                    builder: (context) =>
+                                        PlaceDetailScreen(place: place),
+                                  ),
+                                ),
+                              },
+                            );
+                          },
+                        ),
                       )
                 : Container(),
           ],

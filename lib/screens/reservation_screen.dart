@@ -19,6 +19,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
   List<DateTime> _unavailableDates = [];
+  DateTime _focusedDay = DateTime.now();
   int _numberOfPeople = 1;
 
   @override
@@ -86,7 +87,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       body: Column(
         children: [
           TableCalendar(
-            focusedDay: DateTime.now(),
+            focusedDay: _focusedDay,
             firstDay: DateTime.now(),
             lastDay: DateTime.now().add(const Duration(days: 365)),
             selectedDayPredicate: (day) =>
@@ -100,6 +101,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
                 } else {
                   _endDate = selectedDay;
                 }
+                _focusedDay = focusedDay;
               });
             },
             calendarStyle: CalendarStyle(

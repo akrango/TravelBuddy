@@ -1,5 +1,6 @@
 import 'package:airbnb_app/models/reservation.dart';
 import 'package:airbnb_app/models/place.dart';
+import 'package:airbnb_app/screens/place_details_screen.dart';
 import 'package:airbnb_app/screens/reservation_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -18,17 +19,26 @@ class ReservationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isReservationPassed = reservation.endDate.isBefore(DateTime.now());
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,  
-          children: [
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PlaceDetailScreen(place: place),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,  
+            children: [
             place.image.isNotEmpty
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
@@ -82,6 +92,6 @@ class ReservationCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }

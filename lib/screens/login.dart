@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
   Future<void> _loginWithEmailPassword() async {
     setState(() {
@@ -49,6 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loginWithGoogle() async {
+    setState(() {
+      _isGoogleLoading = true;
+    });
+
     try {
       await FirebaseAuthentication().signInWithGoogle();
     } catch (e) {
@@ -58,14 +63,22 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     }
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     await userProvider.fetchUserRole();
+
+    if (mounted) {
+      setState(() {
+        _isGoogleLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        constraints: const BoxConstraints.expand(),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFEDE7F6), Color(0xFFD1C4E9)],
@@ -140,28 +153,38 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        _isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : ElevatedButton(
-                                onPressed: () =>
-                                    _loginWithEmailPassword(),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.deepPurple,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: const Text(
-                                  "Log In",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                        SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () => _loginWithEmailPassword(),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
+                              child: _isLoading
+                                  ? SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.5,
+                                      ),
+                                    )
+                                  : const Text(
+                                      "Log In",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            )),
                       ],
                     ),
                   ),
@@ -193,14 +216,38 @@ class _LoginScreenState extends State<LoginScreen> {
                   _buildCard(
                     child: Column(
                       children: [
+                        const SizedBox(height: 20),
                         InkWell(
-                          onTap: () => _loginWithGoogle(),
-                          child: socialIcons(
-                            FontAwesomeIcons.google,
-                            "Continue with Google",
-                            Colors.red,
-                          ),
+                          onTap: _isGoogleLoading
+                              ? null
+                              : () => _loginWithGoogle(),
+                          child: _isGoogleLoading
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.deepPurple,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(FontAwesomeIcons.google,
+                                        color: Colors.red),
+                                    const SizedBox(width: 10),
+                                    const Text(
+                                      "Continue with Google",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.deepPurple,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),

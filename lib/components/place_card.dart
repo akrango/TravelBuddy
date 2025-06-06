@@ -162,15 +162,20 @@ class DisplayPlace extends StatelessWidget {
                       SizedBox(height: size.height * 0.01),
                       Row(
                         children: [
-                          Text(
-                            place.address,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                          Flexible(
+                            child: Text(
+                              place.address,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                              softWrap: true,
+                              maxLines: 2,
+                              overflow: TextOverflow
+                                  .ellipsis,
                             ),
                           ),
-                          const Spacer(),
                           const SizedBox(width: 5),
                         ],
                       ),
