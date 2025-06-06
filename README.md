@@ -1,9 +1,9 @@
 # Travel Buddy
 
 ## Description
-Travel Buddy is a Flutter app that lets users explore and book travel accommodations, similar to Airbnb. It supports two roles: hosts who can add and manage listings, and users who can search, browse, and book places.
+Travel Buddy is a Flutter app that lets users explore and book travel accommodations, similar to Airbnb. It supports two roles: hosts who can add and manage listings, and guests who can search, browse, and book places.
 
-Users can filter listings by category, view detailed information, and see all places pinned on a map. The app also includes favorites, reservation tracking, and profile management.
+Guests can filter listings by category, view detailed information, and see all places pinned on a map. The app also includes favorites, reservation tracking, and profile management.
 
 Built with Firebase for authentication, data storage, and image hosting, and integrated with Google Maps for location features, Travel Buddy offers a smooth booking experience. It also features a basic local chatbot powered by LLaMA 2 to help users with app-related questions.
 
@@ -15,7 +15,7 @@ Built with Firebase for authentication, data storage, and image hosting, and int
   - Firebase Auth with Google Sign-In support
 
 - **Dual Roles**  
-  - **Users** can search, favorite, book places and leave reviews 
+  - **Guests** can search, favorite, book places and leave reviews 
   - **Hosts** can add and manage listings
 
 - **Explore & Search**  
