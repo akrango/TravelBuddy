@@ -65,7 +65,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
       placeId: widget.place.id,
       userId: uid,
       startDate: _startDate!,
-      endDate: _endDate!,
+      endDate: _endDate!,                                                                                                                                         
       numberOfPeople: _numberOfPeople,
     );
 

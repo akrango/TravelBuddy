@@ -55,6 +55,7 @@ dependencies:
   file_picker: ^9.2.1
   geocoding: ^3.0.0
   firebase_storage: ^12.4.5
+  ollama: ^1.0.4
 
 dev_dependencies:
   flutter_test:
