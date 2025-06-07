@@ -26,7 +26,11 @@ class DisplayPlace extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No places available'));
+          return const Center(
+              child: Text(
+            'No places available',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ));
         } else {
           List<Place> places = snapshot.data!;
           return ListView.builder(
@@ -172,8 +176,7 @@ class DisplayPlace extends StatelessWidget {
                               ),
                               softWrap: true,
                               maxLines: 2,
-                              overflow: TextOverflow
-                                  .ellipsis,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 5),

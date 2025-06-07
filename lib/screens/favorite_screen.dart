@@ -40,12 +40,11 @@ class FavoriteScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 5),
                       favoriteIds.isEmpty
-                          ? const Text(
-                              "No Favorite items yet",
-                              style: TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black54,
+                          ? const Center(
+                              child: Text(
+                                "You don’t have any reservations yet.",
+                                style:
+                                    TextStyle(fontSize: 16, color: Colors.grey),
                               ),
                             )
                           : GridView.builder(

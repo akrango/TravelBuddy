@@ -53,24 +53,31 @@ class _ReservationsListScreenState extends State<ReservationsListScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ListView.builder(
-                itemCount: reservations.length,
-                itemBuilder: (context, index) {
-                  final reservation = reservations[index];
-                  final place = places[reservation.placeId];
-                  if (place == null) {
-                    return const SizedBox.shrink();
-                  }
+          : reservations.isEmpty
+              ? const Center(
+                  child: Text(
+                    "You don’t have any reservations yet.",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ListView.builder(
+                    itemCount: reservations.length,
+                    itemBuilder: (context, index) {
+                      final reservation = reservations[index];
+                      final place = places[reservation.placeId];
+                      if (place == null) {
+                        return const SizedBox.shrink();
+                      }
 
-                  return ReservationCard(
-                    reservation: reservation,
-                    place: place,
-                  );
-                },
-              ),
-            ),
+                      return ReservationCard(
+                        reservation: reservation,
+                        place: place,
+                      );
+                    },
+                  ),
+                ),
     );
   }
 }

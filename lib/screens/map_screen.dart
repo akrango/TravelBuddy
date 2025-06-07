@@ -159,34 +159,32 @@ class _MapScreenState extends State<MapScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      data["address"] ??
-                          "Address not available",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        data["address"] ?? "Address not available",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                       ),
                     ),
-                    const Spacer(),
-                    const Icon(Icons.star),
-                    const SizedBox(width: 5),
-                    Text(data['rating']?.toString() ??
-                        "N/A"),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.star, size: 18),
+                    const SizedBox(width: 4),
+                    Text(
+                      data['rating']?.toString() ?? "0",
+                      style: const TextStyle(fontSize: 14),
+                    ),
                   ],
-                ),
-                Text(
-                  data['date'] ??
-                      "Date not available",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
-                  ),
                 ),
                 Text.rich(
                   TextSpan(
-                    text:
-                        '\$${data['price'] ?? 'N/A'} ',
+                    text: '\$${data['price'] ?? '\$'} ',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

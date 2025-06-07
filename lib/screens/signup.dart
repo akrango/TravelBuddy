@@ -1,7 +1,7 @@
+import 'package:airbnb_app/main.dart';
 import 'package:airbnb_app/models/user.dart';
 import 'package:airbnb_app/providers/user_provider.dart';
 import 'package:airbnb_app/screens/login.dart';
-import 'package:airbnb_app/screens/main_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -511,9 +511,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       await userProvider.fetchUserRole();
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
+        MaterialPageRoute(builder: (context) => const MainScaffold()),
       );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -547,7 +548,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         await userProvider.fetchUserRole();
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MainScreen()),
+          MaterialPageRoute(builder: (context) => const MainScaffold()),
         );
       }
     } catch (e) {

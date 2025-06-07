@@ -5,6 +5,7 @@ class UserProfileScreen extends StatelessWidget {
   final UserModel user;
 
   UserProfileScreen({required this.user});
+  final String userImage = 'assets/images/user_image.jpg';
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,10 @@ class UserProfileScreen extends StatelessWidget {
               Center(
                 child: CircleAvatar(
                   radius: 70,
-                  backgroundImage: NetworkImage(user.photoURL),
+                  backgroundImage:
+                     (user != null && user.photoURL.startsWith('http'))
+                      ? NetworkImage(user.photoURL)
+                      : AssetImage(userImage) as ImageProvider,
                   backgroundColor: Colors.grey[200],
                 ),
               ),

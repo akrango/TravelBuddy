@@ -183,7 +183,14 @@ class _HelpChatScreenState extends State<HelpChatScreen> {
     UserModel? user = Provider.of<UserProvider>(context).user;
 
     return Scaffold(
-      appBar: AppBar(title: Text("What do you need help with?")),
+      appBar: AppBar(
+        title: Text(
+          "What do you need help with?",
+          style: const TextStyle(fontSize: 18),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -218,7 +225,7 @@ class _HelpChatScreenState extends State<HelpChatScreen> {
                 SizedBox(width: 8),
                 IconButton(
                   icon: Icon(Icons.send),
-                  color: Colors.blueAccent,
+                  color: Colors.deepPurple,
                   onPressed: _sendMessage,
                 ),
               ],
