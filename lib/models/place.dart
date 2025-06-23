@@ -50,6 +50,7 @@ class Place {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'id': id,
       'title': title,
       'isActive': isActive,
       'image': image,

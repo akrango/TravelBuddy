@@ -1,4 +1,5 @@
 import 'package:airbnb_app/providers/place_provider.dart';
+import 'package:airbnb_app/services/review_service.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
@@ -63,9 +64,13 @@ class _MapScreenState extends State<MapScreen> {
           Marker(
             markerId: MarkerId(data['address']),
             position: LatLng(data['latitude'], data['longitude']),
-            onTap: () {
+            onTap: () async {
+              final reviewService = ReviewService();
+              double avgRating =
+                  await reviewService.getAverageRatingForPlace(data['id']);
+
               _customInfoWindowController.addInfoWindow!(
-                _buildInfoWindow(context, data),
+                _buildInfoWindow(context, data, avgRating),
                 LatLng(data['latitude'], data['longitude']),
               );
             },
@@ -79,8 +84,9 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  Widget _buildInfoWindow(BuildContext context, Map data) {
+  Widget _buildInfoWindow(BuildContext context, Map data, double avgRating) {
     Size size = MediaQuery.of(context).size;
+
     return Container(
       height: size.height * 0.20,
       width: size.width * 0.8,
@@ -95,31 +101,32 @@ class _MapScreenState extends State<MapScreen> {
               SizedBox(
                 height: size.height * 0.203,
                 child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(25),
-                      topRight: Radius.circular(25),
-                    ),
-                    child: AnotherCarousel(
-                      images: data['imageUrls']?.map((url) {
-                            if (url.startsWith('http')) {
-                              return NetworkImage(url);
-                            } else {
-                              try {
-                                final decodedBytes =
-                                    base64Decode(url.split(',').last);
-                                return MemoryImage(
-                                    Uint8List.fromList(decodedBytes));
-                              } catch (e) {
-                                return const Icon(Icons.broken_image,
-                                    color: Colors.red);
-                              }
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(25),
+                    topRight: Radius.circular(25),
+                  ),
+                  child: AnotherCarousel(
+                    images: data['imageUrls']?.map((url) {
+                          if (url.startsWith('http')) {
+                            return NetworkImage(url);
+                          } else {
+                            try {
+                              final decodedBytes =
+                                  base64Decode(url.split(',').last);
+                              return MemoryImage(
+                                  Uint8List.fromList(decodedBytes));
+                            } catch (e) {
+                              return const AssetImage(
+                                  'assets/images/broken.png');
                             }
-                          }).toList() ??
-                          [],
-                      dotSize: 5,
-                      indicatorBgPadding: 5,
-                      dotBgColor: Colors.transparent,
-                    )),
+                          }
+                        }).toList() ??
+                        [],
+                    dotSize: 5,
+                    indicatorBgPadding: 5,
+                    dotBgColor: Colors.transparent,
+                  ),
+                ),
               ),
               Positioned(
                 top: 10,
@@ -151,10 +158,7 @@ class _MapScreenState extends State<MapScreen> {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 8,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -177,7 +181,7 @@ class _MapScreenState extends State<MapScreen> {
                     const Icon(Icons.star, size: 18),
                     const SizedBox(width: 4),
                     Text(
-                      data['rating']?.toString() ?? "0",
+                      avgRating.toStringAsFixed(1),
                       style: const TextStyle(fontSize: 14),
                     ),
                   ],
@@ -192,9 +196,7 @@ class _MapScreenState extends State<MapScreen> {
                     children: const [
                       TextSpan(
                         text: "night",
-                        style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.normal),
                       ),
                     ],
                   ),
