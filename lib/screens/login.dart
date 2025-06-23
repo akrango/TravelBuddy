@@ -96,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   const Center(
                     child: Text(
-                      "Welcome to Airbnb",
+                      "Welcome to Travel Buddy",
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
