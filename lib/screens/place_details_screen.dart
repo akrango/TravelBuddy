@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:airbnb_app/components/review_card.dart';
 import 'package:airbnb_app/models/place.dart';
 import 'package:airbnb_app/models/review.dart';
+import 'package:airbnb_app/models/user.dart';
+import 'package:airbnb_app/providers/user_provider.dart';
 import 'package:airbnb_app/services/review_service.dart';
 import 'package:airbnb_app/providers/favorite_provider.dart';
 import 'package:airbnb_app/screens/reservation_screen.dart';
@@ -10,6 +12,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
   final Place place;
@@ -54,6 +57,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    UserModel? user = Provider.of<UserProvider>(context).user;
     Size size = MediaQuery.of(context).size;
     final provider = FavoriteProvider.of(context);
     return Scaffold(
@@ -108,7 +112,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     size,
                     widget.place.vendorProfile,
                     "Stay with ${widget.place.vendor}",
-                    "Superhost . ${widget.place.yearOfHosting} years hosting",
+                    "Superhost . ${user?.yearsOfHosting ?? 0} years hosting",
                   ),
                   const Divider(),
                   amenitiesList(size),
@@ -256,7 +260,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
             ),
           ]
         ],
-      ), 
+      ),
     );
   }
 
